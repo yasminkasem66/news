@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { ApiService } from '../core/api/api.service';
+import { AboutPage } from '../models/about-page';
 import { ContactPage } from '../models/contact-page';
 import { PagedResult } from '../models/delivery-api';
 
@@ -8,6 +9,11 @@ import { PagedResult } from '../models/delivery-api';
 @Injectable({ providedIn: 'root' })
 export class PageService {
   private readonly api = inject(ApiService);
+
+  /** E11. */
+  getAbout(): Observable<AboutPage | null> {
+    return this.singleton<AboutPage>('aboutUsPage');
+  }
 
   /** E12. */
   getContactInfo(): Observable<ContactPage | null> {

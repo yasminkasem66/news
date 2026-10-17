@@ -19,6 +19,13 @@ export const routes: Routes = [
     loadComponent: () => import('./features/news/article-detail.page'),
   },
   {
+    path: 'about',
+    title: 'about.title',
+    loadComponent: () => import('./features/about/about.page'),
+  },
+  // CMS navigation uses this path (research §10, M4).
+  { path: 'about-us', redirectTo: 'about', pathMatch: 'full' },
+  {
     path: 'contact',
     title: 'contact.title',
     loadComponent: () => import('./features/contact/contact.page'),

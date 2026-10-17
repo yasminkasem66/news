@@ -470,19 +470,19 @@ At the end of each brief phase, **stop, summarize what changed (with test result
 
 ### Tests for User Story 6
 
-- [ ] T085 [P] [US6] Extend `src/app/services/page.service.spec.ts` with `getAbout`: it sends `GET {d}?filter=contentType:aboutUsPage`, returns `items[0]` from `E11-about-en.json` (and from `E11-about-ar.json` with `Accept-Language: ar`), and returns `null` for an empty result.
+- [X] T085 [P] [US6] Extend `src/app/services/page.service.spec.ts` with `getAbout`: it sends `GET {d}?filter=contentType:aboutUsPage`, returns `items[0]` from `E11-about-en.json` (and from `E11-about-ar.json` with `Accept-Language: ar`), and returns `null` for an empty result.
 
 ### Implementation for User Story 6
 
-- [ ] T086 [P] [US6] Create `src/app/models/about-page.ts`: `StatItem { label: string; value: string }` (the value is a string, e.g. `"8+"`), `AboutPageProps { heroText: string | null; heroImage: MediaPicker; body: RichText; stats: BlockList<StatItem> }` and `AboutPage = ContentItem<'aboutUsPage', AboutPageProps>`. Add `getAbout(): Observable<AboutPage | null>` to `src/app/services/page.service.ts`. Make T085 pass.
-- [ ] T087 [US6] Create `src/app/features/about/about.page.ts`, which loads `getAbout()` with a `LoadState`:
+- [X] T086 [P] [US6] Create `src/app/models/about-page.ts`: `StatItem { label: string; value: string }` (the value is a string, e.g. `"8+"`), `AboutPageProps { heroText: string | null; heroImage: MediaPicker; body: RichText; stats: BlockList<StatItem> }` and `AboutPage = ContentItem<'aboutUsPage', AboutPageProps>`. Add `getAbout(): Observable<AboutPage | null>` to `src/app/services/page.service.ts`. Make T085 pass.
+- [X] T087 [US6] Create `src/app/features/about/about.page.ts`, which loads `getAbout()` with a `LoadState`:
   - `ok`: `<h1>` name, a hero section with `heroText` and `heroImage` (each left out when empty), the `RichText` body, and stats from `blocks(stats)` as a `<dl>` grid of value + label under `about.stats`, left out when empty (FR-028);
   - `empty`: `state.contentUnavailable`;
   - `error`: `ErrorBlock`.
 
   Re-fetch on language change.
-- [ ] T088 [US6] Register `{ path: 'about', title: 'about.title', loadComponent: () => import('./features/about/about.page') }` and `{ path: 'about-us', redirectTo: 'about', pathMatch: 'full' }` in `src/app/app.routes.ts`.
-- [ ] T089 [P] [US6] Add `src/app/features/about/about.page.spec.ts` covering: renders 2 stats from `E11-about-en.json`; with `stats: null` and `heroImage: null`, those sections are absent; `null` renders `contentUnavailable`. Then check quickstart V9 by hand.
+- [X] T088 [US6] Register `{ path: 'about', title: 'about.title', loadComponent: () => import('./features/about/about.page') }` and `{ path: 'about-us', redirectTo: 'about', pathMatch: 'full' }` in `src/app/app.routes.ts`.
+- [X] T089 [P] [US6] Add `src/app/features/about/about.page.spec.ts` covering: renders 2 stats from `E11-about-en.json`; with `stats: null` and `heroImage: null`, those sections are absent; `null` renders `contentUnavailable`. Then check quickstart V9 by hand.
 
 **Checkpoint**: Every user story works on its own.
 
