@@ -134,10 +134,10 @@ At the end of each brief phase, **stop, summarize what changed (with test result
   - a throwing `localStorage` (spy) falls back to `en` without throwing;
   - `setLang('ar')` sets `lang="ar"` and `dir="rtl"`.
 - [X] T017 Create `src/app/core/api/accept-language.interceptor.ts`:
-  - export `SKIP_LANGUAGE = new HttpContextToken<boolean>(() => false)`;
-  - export a functional `acceptLanguageInterceptor` that, for requests whose URL starts with `${environment.apiBaseUrl}/umbraco/delivery/` and whose context does **not** have `SKIP_LANGUAGE`, sets `Accept-Language: <LanguageService.lang()>`. It never touches `/api/contact`.
+  - export `CULTURE = { en: 'en-US', ar: 'ar' }` (research M6: `en` matches nothing) and `LANGUAGE_OVERRIDE = new HttpContextToken<Lang | null>(() => null)`;
+  - export a functional `acceptLanguageInterceptor` that, for requests whose URL starts with `${environment.apiBaseUrl}/umbraco/delivery/` sets `Accept-Language: CULTURE[override ?? LanguageService.lang()]`, always explicitly. It never touches `/api/contact`.
 
-  Add `src/app/core/api/accept-language.interceptor.spec.ts` covering: header added for delivery URLs (`en` and `ar`), header **absent** when `SKIP_LANGUAGE` is true, header absent for `{api}/api/contact`.
+  Add `src/app/core/api/accept-language.interceptor.spec.ts` covering: `en-US` and `ar` sent for delivery URLs, `LANGUAGE_OVERRIDE` wins over the active language, header absent for `{api}/api/contact`.
 - [X] T018 Create `src/app/core/api/to-load-state.ts`, an RxJS operator `toLoadState<T>(isEmpty: (v: T) => boolean, retry: () => void)`. It emits `{status:'loading'}` first, then `ok`/`empty`, and maps `HttpErrorResponse` (status 0, 5xx, or any other unexpected status) to `{status:'error', retry}`. Add `src/app/core/api/to-load-state.spec.ts`.
 - [X] T019 Update `src/app/app.config.ts`:
   - `provideHttpClient(withXhr(), withInterceptors([acceptLanguageInterceptor]))`;
@@ -182,8 +182,8 @@ At the end of each brief phase, **stop, summarize what changed (with test result
 
 ### Tests for User Story 1
 
-- [ ] T025 [P] [US1] Write `src/app/services/news.service.spec.ts`, section `getArticles` and `getFeatured`, using `provideHttpClientTesting`:
-  - `getArticles({page:1,pageSize:20})` sends `GET {d}?filter=contentType:newsArticle&sort=publishedDate:desc&skip=0&take=20` with `Accept-Language: en`;
+- [X] T025 [P] [US1] Write `src/app/services/news.service.spec.ts`, section `getArticles` and `getFeatured`, using `provideHttpClientTesting`:
+  - `getArticles({page:1,pageSize:20})` sends `GET {d}?filter=contentType:newsArticle&sort=publishedDate:desc&skip=0&take=20` with `Accept-Language: en-US`;
   - `page:2` gives `skip=20`;
   - the response from `E1-articles.json` passes through with `total` 8;
   - `E5-no-results.json` gives `total` 0;
@@ -192,18 +192,18 @@ At the end of each brief phase, **stop, summarize what changed (with test result
 
 ### Implementation for User Story 1
 
-- [ ] T026 [P] [US1] Create `src/app/models/article.ts`:
+- [X] T026 [P] [US1] Create `src/app/models/article.ts`:
   - `CategoryRef = { id: string; name: string; contentType: 'newsCategory'; route: ContentRoute; properties: Record<string, unknown> }`;
   - `ArticleProps`, with every field from data-model.md "Article": `urlSlug: string; category: CategoryRef | null; summary: string /* 50–300 characters (backend rule) */; body: RichText; featuredImage: MediaPicker; gallery: MediaPicker; publishedDate: string; author: string | null; tags: string[] | null; isFeatured: boolean; featuredOrder: number`;
   - `Article = ContentItem<'newsArticle', ArticleProps>`;
   - `ArticleQuery = { page: number; pageSize: number; categoryId?: string; tag?: string }`.
-- [ ] T027 [US1] Create `src/app/services/news.service.ts` (`providedIn: 'root'`) with:
+- [X] T027 [US1] Create `src/app/services/news.service.ts` (`providedIn: 'root'`) with:
   - `getArticles(q: ArticleQuery): Observable<PagedResult<Article>>`, which calls `ApiService.getContent` with `filters: ['contentType:newsArticle', …(q.categoryId ? ['category:'+id] : []), …(q.tag ? ['tags:'+tag] : [])]`, `sort: 'publishedDate:desc'`, `skip: (page-1)*pageSize` and `take: pageSize`;
   - `getFeatured(): Observable<Article[]>`, with a stable sort by `featuredOrder` asc then `createDate` asc.
 
   Make T025 pass.
-- [ ] T028 [P] [US1] Create `src/app/shared/media-url.pipe.ts` (`mediaUrl` pure pipe wrapping `mediaUrl(firstMedia(x))`).
-- [ ] T029 [P] [US1] Create `src/app/features/news/article-card.ts`, a component with inputs `article: Article`, `showEnglishOnlyBadge = false` and `headingLevel: 2 | 3 = 3`. It renders:
+- [X] T028 [P] [US1] Create `src/app/shared/media-url.pipe.ts` (`mediaUrl` pure pipe wrapping `mediaUrl(firstMedia(x))`).
+- [X] T029 [P] [US1] Create `src/app/features/news/article-card.ts`, a component with inputs `article: Article`, `showEnglishOnlyBadge = false` and `headingLevel: 2 | 3 = 3`. It renders:
   - the featured image (via the pipe, `alt` = article name, `loading="lazy"`, fixed aspect ratio, and an icon placeholder when there is no image);
   - the title as `routerLink` `/news/{id}`;
   - the category name;
@@ -212,14 +212,14 @@ At the end of each brief phase, **stop, summarize what changed (with test result
   - the author only when present.
 
   Leave out empty parts (FR-005). Add `src/app/features/news/article-card.spec.ts` using item 1 from `E1-articles.json`.
-- [ ] T030 [P] [US1] Create `src/app/shared/pagination.ts`, a component with inputs `page`, `pageSize` and `total`, emitting `pageChange`. It renders prev/next plus "page X of Y" (translated), hides itself when `total <= pageSize`, uses `<nav aria-label>`, and puts `aria-current="page"` on the current page. The chevron icons use `rtl:rotate-180`. Add `src/app/shared/pagination.spec.ts`.
-- [ ] T031 [P] [US1] Create `src/app/features/news/featured-strip.ts`, a component that loads `NewsService.getFeatured()` through `toLoadState`:
+- [X] T030 [P] [US1] Create `src/app/shared/pagination.ts`, a component with inputs `page`, `pageSize` and `total`, emitting `pageChange`. It renders prev/next plus "page X of Y" (translated), hides itself when `total <= pageSize`, uses `<nav aria-label>`, and puts `aria-current="page"` on the current page. The chevron icons use `rtl:rotate-180`. Add `src/app/shared/pagination.spec.ts`.
+- [X] T031 [P] [US1] Create `src/app/features/news/featured-strip.ts`, a component that loads `NewsService.getFeatured()` through `toLoadState`:
   - `ok` renders a horizontal list of `ArticleCard`s under the `news.featured` heading;
   - `empty` renders **nothing at all** (no heading, never filled with other articles; FR-010);
   - `error` renders a compact `ErrorBlock` with retry, **independent** of the list (FR-011).
 
   It re-fetches when `LanguageService.lang()` changes.
-- [ ] T032 [US1] Create `src/app/features/news/news-list.page.ts`, a page component:
+- [X] T032 [US1] Create `src/app/features/news/news-list.page.ts`, a page component:
   - reads `page` (int ≥ 1, default 1, invalid values become 1) from query params via the component input binding;
   - loads `getArticles({ page, pageSize: 20 })` through `toLoadState`;
   - shows `FeaturedStrip` above the list;
@@ -227,11 +227,11 @@ At the end of each brief phase, **stop, summarize what changed (with test result
   - a page past the end (items empty, total > 0) shows `news.noResults`;
   - `Pagination` changes `?page=` via `router.navigate([], { queryParams, queryParamsHandling: 'merge' })`;
   - re-fetches when `lang()` or `page` changes.
-- [ ] T033 [US1] Register `{ path: 'news', title: 'news.title', loadComponent: () => import('./features/news/news-list.page') }` before the wildcard in `src/app/app.routes.ts`.
-- [ ] T034 [P] [US1] Add `src/app/features/news/featured-strip.spec.ts` covering: `ok` renders 3 cards in order; `empty` renders no heading; `error` shows retry while a sibling list is unaffected.
-- [ ] T035 [P] [US1] Add `src/app/features/news/news-list.page.spec.ts` covering: `noArticlesYet` for `E5-no-results.json` with no filters; 8 cards for `E1-articles.json`; the `?page=` input feeds `skip`.
-- [ ] T036 [US1] Add a temporary `news` link to the placeholder header in `src/app/layout/header.ts` (US7 replaces it with CMS navigation).
-- [ ] T037 [US1] Manual check against quickstart V1 with `npm start`. Record the result for the phase report.
+- [X] T033 [US1] Register `{ path: 'news', title: 'news.title', loadComponent: () => import('./features/news/news-list.page') }` before the wildcard in `src/app/app.routes.ts`.
+- [X] T034 [P] [US1] Add `src/app/features/news/featured-strip.spec.ts` covering: `ok` renders 3 cards in order; `empty` renders no heading; `error` shows retry while a sibling list is unaffected.
+- [X] T035 [P] [US1] Add `src/app/features/news/news-list.page.spec.ts` covering: `noArticlesYet` for `E5-no-results.json` with no filters; 8 cards for `E1-articles.json`; the `?page=` input feeds `skip`.
+- [X] T036 [US1] Add a temporary `news` link to the placeholder header in `src/app/layout/header.ts` (US7 replaces it with CMS navigation).
+- [X] T037 [US1] Manual check against quickstart V1 with `npm start`. Record the result for the phase report.
 
 **Checkpoint**: US1 works on its own (MVP slice).
 
@@ -247,7 +247,7 @@ At the end of each brief phase, **stop, summarize what changed (with test result
 
 - [ ] T038 [P] [US2] Extend `src/app/services/news.service.spec.ts` with a `getArticle` section:
   - 200 (`E7-article-detail.json`) gives `{kind:'ok', article}` with `cultures` kept;
-  - in `ar`, a 404 on `{d}/item/170e2282…` triggers exactly **one** retry to the same URL with **no** `Accept-Language` header (assert `req.request.headers.has('Accept-Language') === false` and `SKIP_LANGUAGE` set), which responds 200 (`E8-language-gap-retry-default.json`) and gives `{kind:'languageGap', availableIn:['en']}`;
+  - in `ar`, a 404 on `{d}/item/170e2282…` triggers exactly **one** retry to the same URL with `Accept-Language: en-US` (via `LANGUAGE_OVERRIDE`), which responds 200 (`E8-language-gap-retry-default.json`) and gives `{kind:'languageGap', availableIn:['en']}`;
   - in `ar`, a 404 then a 404 gives `{kind:'notFound'}`;
   - in `en`, a 404 gives `{kind:'notFound'}` with **no** retry (`expectNone`);
   - a 500 propagates as an error.
@@ -256,7 +256,7 @@ At the end of each brief phase, **stop, summarize what changed (with test result
 
 - [ ] T039 [US2] Add `getArticle(id: string): Observable<ArticleResult>` to `src/app/services/news.service.ts`, with `ArticleResult = {kind:'ok'; article: Article} | {kind:'notFound'} | {kind:'languageGap'; availableIn: Lang[]}` exported from `src/app/models/article.ts`:
   - `ApiService.getItem(id)`;
-  - on `HttpErrorResponse` 404, if `LanguageService.lang() === 'ar'`, call `getItem(id, new HttpContext().set(SKIP_LANGUAGE, true))`: 200 gives `languageGap(availableLangs(res))`, 404 gives `notFound`;
+  - on `HttpErrorResponse` 404, if `LanguageService.lang() === 'ar'`, call `getItem(id, new HttpContext().set(LANGUAGE_OVERRIDE, 'en'))`: 200 gives `languageGap(availableLangs(res))`, 404 gives `notFound`;
   - a 404 in `en` gives `notFound`;
   - other errors rethrow.
 
@@ -417,7 +417,7 @@ At the end of each brief phase, **stop, summarize what changed (with test result
 ### Tests for User Story 7
 
 - [ ] T073 [P] [US7] Write `src/app/services/site-settings.service.spec.ts` covering:
-  - the first subscription sends `GET {d}?filter=contentType:siteSettings` with `Accept-Language: en` and yields `ok` with `items[0]` (`E10-site-settings.json`);
+  - the first subscription sends `GET {d}?filter=contentType:siteSettings` with `Accept-Language: en-US` and yields `ok` with `items[0]` (`E10-site-settings.json`);
   - a second subscriber in the same language sends **no** new request (`expectNone`; shared per language, FR-024);
   - after `setLang('ar')` exactly one new request goes out with `Accept-Language: ar` (`E10-site-settings-ar.json`);
   - `{"total":0,"items":[]}` gives `empty`;

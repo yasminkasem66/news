@@ -4,7 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../environments/environment';
 import { provideTranslocoTesting } from '../../testing/transloco-testing';
 import { LanguageService } from '../i18n/language.service';
-import { acceptLanguageInterceptor, SKIP_LANGUAGE } from './accept-language.interceptor';
+import { acceptLanguageInterceptor, LANGUAGE_OVERRIDE } from './accept-language.interceptor';
 
 describe('acceptLanguageInterceptor', () => {
   const deliveryUrl = `${environment.apiBaseUrl}/umbraco/delivery/api/v2/content`;
@@ -31,19 +31,19 @@ describe('acceptLanguageInterceptor', () => {
     language.setLang('en');
   });
 
-  it('sends the active language on Delivery API requests', () => {
+  it('sends the backend culture for the active language (en-US, not en)', () => {
     http.get(deliveryUrl).subscribe();
-    expect(controller.expectOne(deliveryUrl).request.headers.get('Accept-Language')).toBe('en');
+    expect(controller.expectOne(deliveryUrl).request.headers.get('Accept-Language')).toBe('en-US');
 
     language.setLang('ar');
     http.get(deliveryUrl).subscribe();
     expect(controller.expectOne(deliveryUrl).request.headers.get('Accept-Language')).toBe('ar');
   });
 
-  it('sends no language header when SKIP_LANGUAGE is set', () => {
+  it('uses LANGUAGE_OVERRIDE instead of the active language when set', () => {
     language.setLang('ar');
-    http.get(deliveryUrl, { context: new HttpContext().set(SKIP_LANGUAGE, true) }).subscribe();
-    expect(controller.expectOne(deliveryUrl).request.headers.has('Accept-Language')).toBeFalse();
+    http.get(deliveryUrl, { context: new HttpContext().set(LANGUAGE_OVERRIDE, 'en') }).subscribe();
+    expect(controller.expectOne(deliveryUrl).request.headers.get('Accept-Language')).toBe('en-US');
   });
 
   it('never adds the header to the contact endpoint', () => {

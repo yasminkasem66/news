@@ -4,8 +4,9 @@ How every frontend data service maps to a verified backend request. Components M
 these methods (Constitution VII). The unit tests for each method assert exactly the request shown
 here. `{api}` = `environment.apiBaseUrl` (dev: `http://localhost:25050`); `{d}` =
 `{api}/umbraco/delivery/api/v2/content`. Every `{d}` request carries `Accept-Language: <active lang>`
-(added by `acceptLanguageInterceptor`), except a request marked with the `SKIP_LANGUAGE` context
-token. `?culture=` is never used because the backend ignores it (research M5).
+(added by `acceptLanguageInterceptor`). The header value is the backend culture: `en-US` for
+English (`en` matches nothing, research M6) and `ar` for Arabic. A request marked with the
+`LANGUAGE_OVERRIDE` context token uses that language instead of the active one. `?culture=` is never used because the backend ignores it (research M5).
 
 ## NewsService
 
@@ -13,7 +14,7 @@ token. `?culture=` is never used because the backend ignores it (research M5).
 |---|---|---|---|---|
 | `getArticles(q: ArticleQuery)` | `Observable<PagedResult<Article>>` | `GET {d}?filter=contentType:newsArticle[&filter=category:{categoryId}][&filter=tags:{tag}]&sort=publishedDate:desc&skip={(page-1)*pageSize}&take={pageSize}` | E1, E3, E4, E5 | Response passed through unchanged: `{ total, items }`. `total: 0` → empty state |
 | `getFeatured()` | `Observable<Article[]>` | `GET {d}?filter=contentType:newsArticle&filter=isFeatured:1&sort=featuredOrder:asc` | E6 | `items`, stable tie-break by `createDate` asc. `[]` hides the section |
-| `getArticle(id)` | `Observable<ArticleResult>` (`ok \| notFound \| languageGap`) | `GET {d}/item/{id}`. On **404 while the active language is `ar`** only: the same `GET {d}/item/{id}` with **no** `Accept-Language` (an `HttpContext` `SKIP_LANGUAGE` token bypasses the interceptor), as documented in `05-api-reference.md` | E7, E8, E9 | 200 → `ok` (keeps `cultures`). 404 + retry 200 → `languageGap(availableLangs(retry))`. 404 + retry 404 → `notFound`. 404 in `en` → `notFound` with no retry. Other errors propagate |
+| `getArticle(id)` | `Observable<ArticleResult>` (`ok \| notFound \| languageGap`) | `GET {d}/item/{id}`. On **404 while the active language is `ar`** only: the same `GET {d}/item/{id}` with `Accept-Language: en-US` (via `LANGUAGE_OVERRIDE` = `en`). This is the documented "no language qualifier" retry, made explicit because a browser fills in its own default `Accept-Language` when the header is omitted | E7, E8, E9 | 200 → `ok` (keeps `cultures`). 404 + retry 200 → `languageGap(availableLangs(retry))`. 404 + retry 404 → `notFound`. 404 in `en` → `notFound` with no retry. Other errors propagate |
 | `getCategories()` | `Observable<Category[]>` | `GET {d}?filter=contentType:newsCategory` | E2 | `items` in response order |
 
 ## SiteSettingsService

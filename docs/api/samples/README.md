@@ -24,7 +24,7 @@ Seed ids used below:
 | `E7-article-detail.json` | `/item/5b8e0d5f-…` | 200 | Has a `cultures` map (`ar`, `en-US`) |
 | `E8-article-detail-ar.json` | E7 with `Accept-Language: ar` | 200 | Arabic name and category (تقنية) |
 | `E8-article-detail-ar-language-gap.json` | `/item/170e2282-…` with `ar` | **404** | Empty body |
-| `E8-language-gap-retry-default.json` | `/item/170e2282-…` with no language header | 200 | Proves "exists, not translated" |
+| `E8-language-gap-retry-default.json` | `/item/170e2282-…` with no language header (curl) | 200 | Proves "exists, not translated" |
 | `E9-not-found.json` | `/item/00000000-…` | **404** | Empty body, identical to the language-gap 404 |
 | `E10-site-settings.json` / `-ar.json` | `filter=contentType:siteSettings` | 200 | Block List shape `{ items: [{ content, settings }] }` |
 | `E11-about-en.json` / `-ar.json` | `filter=contentType:aboutUsPage` | 200 | |
@@ -34,3 +34,4 @@ Seed ids used below:
 | `X-culture-query-ar.json` | E1 with `?culture=ar` (no header) | 200 | **Ignored**: 8 items, English names. The same is true on `/item/{id}?culture=ar`. Use the header |
 | `X-fulltext-query.json` | `query=Marathon` | 200 | **Ignored**: all 8 returned. No free-text search |
 | `X-featured-true.json` | `filter=isFeatured:true` | 200 | **Ignored**: all 8 returned. Use `isFeatured:1` |
+| `X-accept-language-en.json` | E1 with `Accept-Language: en` | 200 | **`total: 0`**: the English culture is `en-US` (M6). Send `Accept-Language: en-US` |

@@ -75,7 +75,7 @@ disagree, the captured behavior wins.
   - `Accept-Language: ar` changes the names, rich text and Block List labels.
   - Content without an Arabic version is excluded from lists: E1 in `ar` has `total: 5`.
   - For detail, both an English-only article in `ar` and a nonexistent id return **404 with an empty body**. [05-api-reference.md](../../docs/api/05-api-reference.md) documents this as native Umbraco behavior.
-  - Retrying the same id **with no language header** gives 200 for "exists, not translated" (`E8-language-gap-retry-default.json`) and 404 for a genuinely invalid id. This is the backend's documented, supported workaround.
+  - Retrying the same id **in the default culture** (no header from curl, or `Accept-Language: en-US`) gives 200 for "exists, not translated" (`E8-language-gap-retry-default.json`) and 404 for a genuinely invalid id. This is the backend's documented, supported workaround.
   - Both list items and the detail response carry a `cultures` map. Keys are `en-US` and `ar`, and a missing `ar` key means there is no Arabic version.
   - `?culture=ar` is **ignored** on both list and detail, contrary to the doc (mismatch M5). Only the `Accept-Language` header works.
 - **Decision** (language-gap detection, two layers):
@@ -85,13 +85,14 @@ disagree, the captured behavior wins.
      - In the English list, cards for articles without `ar` show a small "English only" badge, so visitors aren't surprised later. This follows the doc's advice not to promise an Arabic version.
      - The Arabic list never contains them, because the server filters them out.
   2. **Unknown `cultures` (deep link, bookmark, refresh) and a 404**:
-     - `NewsService.getArticle` makes **one retry of the same `/item/{id}` request with no `Accept-Language` header** (the documented way).
+     - `NewsService.getArticle` makes **one retry of the same `/item/{id}` request with `Accept-Language: en-US`**. This is the documented "no qualifier" retry made explicit: in a browser, an omitted header is replaced by the browser's own default, which could be Arabic.
      - 200 gives `{ kind: 'languageGap', availableIn: <languages from the retry's cultures map> }`.
      - 404 gives `{ kind: 'notFound' }`.
      - When the active language is already `en`, a 404 is final and there is no retry.
 - **Decision** (header handling):
   - An HTTP interceptor adds `Accept-Language` to every request whose URL starts with `${apiBaseUrl}/umbraco/delivery/`.
-  - The retry opts out through an `HttpContext` token (`SKIP_LANGUAGE`), so it goes out with no language qualifier, exactly like the documented workaround.
+  - The header value is the backend culture: `en` → `en-US`, `ar` → `ar` (M6).
+  - The retry sets an `HttpContext` token (`LANGUAGE_OVERRIDE` = `en`) so it is sent as `en-US` whatever the active language.
   - The language is a signal in `LanguageService`, persisted to `localStorage` key `news.lang`. Every access is wrapped in try/catch with `isPlatformBrowser`. The fallback is `en`.
   - On change, the service sets `document.documentElement.lang`/`dir` and calls `TranslocoService.setActiveLang`.
 - **Alternatives considered**:
@@ -165,6 +166,7 @@ disagree, the captured behavior wins.
 | G2 | Gap (open) | `query=` full-text search is ignored. `05-api-reference.md` does not offer it either | No free-text search | Tag search only (§4) |
 | M1 | Mismatch (resolved) | 400 error keys are PascalCase. `05-api-reference.md` agrees, the older `contact-submission.md` does not | Field mapping | Case-insensitive mapping (§11) |
 | M2 | Mismatch | `isFeatured:true` (`delivery-api-reads.md`) is ignored; `isFeatured:1` works, as in `05-api-reference.md` | Featured list | Use `:1` (§3) |
-| M3 | Known limitation | Not-found and language-gap 404s are identical (empty body). Documented in `05-api-reference.md` | Detail state | `cultures` map plus a retry with no language header (§6) |
+| M3 | Known limitation | Not-found and language-gap 404s are identical (empty body). Documented in `05-api-reference.md` | Detail state | `cultures` map plus a retry in `en-US` (§6) |
 | M4 | Mismatch | CMS nav uses `/about-us`; brief routes use `/about` | Navigation | Redirect routes (§10) |
+| M6 | Mismatch (open) | `Accept-Language: en` (as written in the brief, Postman and `05-api-reference.md`) returns `total: 0` and 404s; the English culture is `en-US`. Found during US1 browser check, 2026-10-17 | Every English request | Interceptor sends `en-US` for English, always explicitly (§6). Report to the backend owner |
 | M5 | Mismatch (open) | `05-api-reference.md` says `?culture=ar` works like the header; it is ignored on list and detail | Language selection | Use the `Accept-Language` header only (§6). Report to the backend owner |

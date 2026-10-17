@@ -19,7 +19,8 @@ was re-seeded. The backend's reference is now in `docs/api/05-api-reference.md`.
   exactly as in Postman.
 - **G2 remains**: full-text search does not work, so only tag search ships.
 - The language-gap state uses the `cultures` map when it is known (list or switch). On a deep-link
-  404 it retries the request with no language header, the backend's documented approach.
+  404 it retries the request in the default culture (`en-US`), the backend's documented approach.
+- English must be requested as `Accept-Language: en-US`; `en` returns nothing (research M6).
 
 ## Technical Context
 
@@ -127,7 +128,7 @@ use signals; feature routes use `loadComponent`.
 |---|---|---|---|
 | 0 | Discovery and plan | **Done in this run**: samples, research, data model, contracts | Plan confirmed by the user |
 | 1 | Foundation | environments + `fileReplacements`, models, `ApiService`, `LanguageService`, interceptor, `LoadState`/error classification, `lang`/`dir`, fixed `app.spec.ts`, i18n key skeleton | build + tests pass |
-| 2 | Data services | `NewsService` (server paging, plus the language-gap retry with `SKIP_LANGUAGE`), `SiteSettingsService`, `PageService`, `ContactService` with `HttpTestingController` specs | all service specs pass |
+| 2 | Data services | `NewsService` (server paging, plus the language-gap retry with `LANGUAGE_OVERRIDE`), `SiteSettingsService`, `PageService`, `ContactService` with `HttpTestingController` specs | all service specs pass |
 | 3 | Shell | header (logo, nav, switcher, mobile menu), footer (optional parts), shared settings per language, CMS link handling | V6, V9 (nav part) |
 | 4 | News list | `/news`, cards, pagination, category filter, tag search, URL sync, featured strip, empty/error states | V1–V3, V6 |
 | 5 | Article detail | `/news/:id`, sanitized body, gallery, tag links, title, notFound / languageGap (from `cultures` or the retry) | V4, V5, V7a, V7b |

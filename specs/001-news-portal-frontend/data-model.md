@@ -104,7 +104,7 @@ LoadState<T> =
   | { status: 'ok'; data: T }
   | { status: 'empty' }                         // 200 with items: [] or a missing singleton
   | { status: 'notFound' }                      // 404 that is missing in every language
-  | { status: 'languageGap'; availableIn: Lang[] } // missing in the active language: from `cultures`, or 404 + 200 on the no-header retry
+  | { status: 'languageGap'; availableIn: Lang[] } // missing in the active language: from `cultures`, or 404 + 200 on the English retry
   | { status: 'error'; retry: () => void }      // network / 5xx / unexpected
 ```
 
