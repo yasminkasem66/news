@@ -3,6 +3,12 @@ import { Routes } from '@angular/router';
 // Route `title`s are Transloco keys (see PageTitleStrategy). Feature routes go before the wildcard.
 export const routes: Routes = [
   {
+    path: '',
+    pathMatch: 'full',
+    title: 'nav.home',
+    loadComponent: () => import('./features/home/home.page'),
+  },
+  {
     path: 'news',
     title: 'news.title',
     loadComponent: () => import('./features/news/news-list.page'),

@@ -416,7 +416,7 @@ At the end of each brief phase, **stop, summarize what changed (with test result
 
 ### Tests for User Story 7
 
-- [ ] T073 [P] [US7] Write `src/app/services/site-settings.service.spec.ts` covering:
+- [X] T073 [P] [US7] Write `src/app/services/site-settings.service.spec.ts` covering:
   - the first subscription sends `GET {d}?filter=contentType:siteSettings` with `Accept-Language: en-US` and yields `ok` with `items[0]` (`E10-site-settings.json`);
   - a second subscriber in the same language sends **no** new request (`expectNone`; shared per language, FR-024);
   - after `setLang('ar')` exactly one new request goes out with `Accept-Language: ar` (`E10-site-settings-ar.json`);
@@ -425,38 +425,38 @@ At the end of each brief phase, **stop, summarize what changed (with test result
 
 ### Implementation for User Story 7
 
-- [ ] T074 [P] [US7] Create `src/app/models/site-settings.ts`:
+- [X] T074 [P] [US7] Create `src/app/models/site-settings.ts`:
   - `LinkBlock { label: string; url: string; openInNewTab: boolean }`
   - `FooterLinkColumn { columnTitle: string; links: BlockList<LinkBlock> }`
   - `SiteSettingsProps { logo: MediaPicker; primaryNavigation: BlockList<LinkBlock>; footerAboutText: RichText | null; footerLinkColumns: BlockList<FooterLinkColumn>; socialLinks: BlockList<SocialLink>; copyrightText: string | null }`
   - `SiteSettings = ContentItem<'siteSettings', SiteSettingsProps>`
-- [ ] T075 [US7] Create `src/app/services/site-settings.service.ts` (`providedIn: 'root'`). It exposes `settings: Signal<LoadState<SiteSettings>>` built from `toObservable(LanguageService.lang)` → `switchMap` to `ApiService.getContent({ filters: ['contentType:siteSettings'] })` → `items[0]` → `toLoadState`, with `shareReplay({ bufferSize: 1, refCount: false })`, then `toSignal`. It also has `reload()`. Make T073 pass.
-- [ ] T076 [US7] Rebuild `src/app/layout/header.ts` from `SiteSettingsService.settings()`:
+- [X] T075 [US7] Create `src/app/services/site-settings.service.ts` (`providedIn: 'root'`). It exposes `settings: Signal<LoadState<SiteSettings>>` built from `toObservable(LanguageService.lang)` → `switchMap` to `ApiService.getContent({ filters: ['contentType:siteSettings'] })` → `items[0]` → `toLoadState`, with `shareReplay({ bufferSize: 1, refCount: false })`, then `toSignal`. It also has `reload()`. Make T073 pass.
+- [X] T076 [US7] Rebuild `src/app/layout/header.ts` from `SiteSettingsService.settings()`:
   - logo image (`mediaUrl(firstMedia(logo))`, `alt` = `site.name`) linking to `/`, falling back to the `site.name` text while loading, on error, or with no logo;
   - a `<nav aria-label>` with `blocks(primaryNavigation)` rendered through `CmsLink` (internal → router, external → href, `openInNewTab` honored; FR-025);
   - `LanguageSwitcher`;
   - on mobile (below `md`), a menu toggle button with `aria-expanded` / `aria-controls` that closes on navigation and on Escape.
 
   Remove the temporary `news` link from T036, **unless** the CMS navigation lacks a News item. In that case keep it, using the `nav.news` label, and note it as a content gap in the phase report. Settings loading or errors never block the page.
-- [ ] T077 [US7] Build `src/app/layout/footer.ts` from `settings()`:
+- [X] T077 [US7] Build `src/app/layout/footer.ts` from `settings()`:
   - `RichText` `footerAboutText`;
   - `blocks(footerLinkColumns)`, each rendered as a `<h2>` `columnTitle` plus a `<ul>` of `CmsLink` from `blocks(column.links)`;
   - `SocialLinks` from `blocks(socialLinks)`;
   - `copyrightText`.
 
   **Leave out every empty section entirely** (FR-023), and render nothing extra on load error.
-- [ ] T078 [P] [US7] Add `src/app/layout/header.spec.ts` (renders 2 nav links from `E10-site-settings.json`, `/about-us` as a `routerLink`; `aria-expanded` toggles) and `src/app/layout/footer.spec.ts` (renders the "Company" column and 2 social links; with `footerAboutText: null` and `socialLinks: null`, those sections are absent).
-- [ ] T079 [US7] Check that language switching re-renders the header and footer in Arabic (`E10-site-settings-ar.json` labels) and that both mirror correctly in RTL.
-- [ ] T080 [US7] Confirm CMS link handling end to end: header "About" (`/about-us`) routes inside the app (it needs US6's redirect; until US6 is built it lands on not-found, which is expected), and social links open in a new tab with `rel="noopener noreferrer"`.
-- [ ] T081 [US7] Create `src/app/features/home/home.page.ts`:
+- [X] T078 [P] [US7] Add `src/app/layout/header.spec.ts` (renders 2 nav links from `E10-site-settings.json`, `/about-us` as a `routerLink`; `aria-expanded` toggles) and `src/app/layout/footer.spec.ts` (renders the "Company" column and 2 social links; with `footerAboutText: null` and `socialLinks: null`, those sections are absent).
+- [X] T079 [US7] Check that language switching re-renders the header and footer in Arabic (`E10-site-settings-ar.json` labels) and that both mirror correctly in RTL.
+- [X] T080 [US7] Confirm CMS link handling end to end: header "About" (`/about-us`) routes inside the app (it needs US6's redirect; until US6 is built it lands on not-found, which is expected), and social links open in a new tab with `rel="noopener noreferrer"`.
+- [X] T081 [US7] Create `src/app/features/home/home.page.ts`:
   - `FeaturedStrip` (reused);
   - a "Latest" section (`news.latest`) loading `NewsService.getArticles({ page: 1, pageSize: 6 })` with its own `LoadState` (loading / empty `noArticlesYet` / error with retry), shown as `ArticleCard`s;
   - a `news.viewAll` link to `/news` (FR-027).
 
   Featured and latest fail independently.
-- [ ] T082 [US7] Register `{ path: '', pathMatch: 'full', title: 'nav.home', loadComponent: () => import('./features/home/home.page') }` as the first route in `src/app/app.routes.ts`.
-- [ ] T083 [P] [US7] Add `src/app/features/home/home.page.spec.ts` covering: 6 latest cards render; a featured error doesn't hide the latest section; a "view all" link to `/news` is present.
-- [ ] T084 [US7] Check quickstart V9 (navigation) and V14 by hand, and confirm any article is reachable from `/` in 3 clicks or fewer (SC-003).
+- [X] T082 [US7] Register `{ path: '', pathMatch: 'full', title: 'nav.home', loadComponent: () => import('./features/home/home.page') }` as the first route in `src/app/app.routes.ts`.
+- [X] T083 [P] [US7] Add `src/app/features/home/home.page.spec.ts` covering: 6 latest cards render; a featured error doesn't hide the latest section; a "view all" link to `/news` is present.
+- [X] T084 [US7] Check quickstart V9 (navigation) and V14 by hand, and confirm any article is reachable from `/` in 3 clicks or fewer (SC-003).
 
 **Checkpoint**: US7 works on its own, with the full shell in place.
 
