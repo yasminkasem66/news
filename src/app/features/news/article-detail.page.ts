@@ -2,7 +2,9 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, input } f
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { LucideArrowRight, LucideLanguages } from '@lucide/angular';
+import { of, tap } from 'rxjs';
 import { loadStateSignal } from '../../core/api/load-state-signal';
+import { availableLangs } from '../../core/util/cultures';
 import { LanguageService } from '../../core/i18n/language.service';
 import { PageTitleStrategy } from '../../core/i18n/page-title.strategy';
 import { Article, ArticleResult } from '../../models/article';
@@ -120,9 +122,22 @@ export default class ArticleDetailPage {
 
   protected readonly lang = this.language.lang;
 
+  /** Last article shown, kept so a language switch can use its `cultures` (research §6, layer 1). */
+  private lastArticle: Article | null = null;
+
   private readonly result = loadStateSignal(
     () => ({ id: this.id(), lang: this.lang() }),
-    ({ id }) => this.news.getArticle(id),
+    ({ id, lang }) => {
+      const known = this.lastArticle?.id === id ? this.lastArticle : null;
+      const langs = availableLangs(known);
+      if (known && langs.length && !langs.includes(lang)) {
+        // Known not to exist in this language: no request needed.
+        return of<ArticleResult>({ kind: 'languageGap', availableIn: langs });
+      }
+      return this.news.getArticle(id).pipe(
+        tap((result) => (this.lastArticle = result.kind === 'ok' ? result.article : this.lastArticle)),
+      );
+    },
     () => false,
   );
 

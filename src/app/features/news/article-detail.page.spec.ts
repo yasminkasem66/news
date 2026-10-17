@@ -76,6 +76,32 @@ describe('ArticleDetailPage', () => {
     expect(getArticle).toHaveBeenCalledTimes(2);
   });
 
+  it('switching to a language the loaded article lacks shows the gap instantly, with no request', () => {
+    const englishOnly = { ...article, cultures: { 'en-US': article.cultures!['en-US'] } };
+    const fixture = render(() => of({ kind: 'ok', article: englishOnly }));
+    expect(getArticle).toHaveBeenCalledTimes(1);
+
+    TestBed.inject(LanguageService).setLang('ar');
+    fixture.detectChanges();
+
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('h1')!.textContent).toContain('غير متاح بهذه اللغة');
+    expect(getArticle).toHaveBeenCalledTimes(1);
+
+    // Switching back fetches the English article again.
+    (el.querySelector('section button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(getArticle).toHaveBeenCalledTimes(2);
+    expect(el.querySelector('h1')!.textContent).toContain('City Unveils New Tech Hub');
+  });
+
+  it('switching to a language the article has re-fetches it', () => {
+    const fixture = render(() => of({ kind: 'ok', article }));
+    TestBed.inject(LanguageService).setLang('ar');
+    fixture.detectChanges();
+    expect(getArticle).toHaveBeenCalledTimes(2);
+  });
+
   it('renders a gallery when the article has one', () => {
     const image = article.properties.featuredImage![0];
     const withGallery = { ...article, properties: { ...article.properties, gallery: [image, { ...image, id: 'x2' }] } };

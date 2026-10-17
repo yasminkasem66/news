@@ -1,15 +1,16 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { LanguageSwitcher } from './language-switcher';
 
-/** Placeholder header; US3 adds the language switcher and US7 the CMS logo and navigation. */
+/** Placeholder header with the language switcher; US7 adds the CMS logo and navigation. */
 @Component({
   selector: 'app-header',
-  imports: [RouterLink, RouterLinkActive, TranslocoPipe],
+  imports: [RouterLink, RouterLinkActive, TranslocoPipe, LanguageSwitcher],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <header class="border-b border-slate-200 bg-white">
-      <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
+      <div class="mx-auto flex max-w-6xl flex-wrap items-center gap-4 px-4 py-3">
         <a routerLink="/" class="text-lg font-bold text-slate-900">{{ 'site.name' | transloco }}</a>
         <!-- Temporary until US7 renders the CMS primaryNavigation. -->
         <nav [attr.aria-label]="'nav.primary' | transloco">
@@ -21,6 +22,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
             >{{ 'nav.news' | transloco }}</a
           >
         </nav>
+        <app-language-switcher class="ms-auto" />
       </div>
     </header>
   `,
