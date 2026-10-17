@@ -6,6 +6,7 @@ import { ApiService } from '../core/api/api.service';
 import { LanguageService } from '../core/i18n/language.service';
 import { availableLangs } from '../core/util/cultures';
 import { Article, ArticleQuery, ArticleResult } from '../models/article';
+import { Category } from '../models/category';
 import { PagedResult } from '../models/delivery-api';
 import { DEFAULT_LANG } from '../models/lang';
 
@@ -30,6 +31,13 @@ export class NewsService {
       skip: (query.page - 1) * query.pageSize,
       take: query.pageSize,
     });
+  }
+
+  /** E2: categories in editor order (filter values are their ids). */
+  getCategories(): Observable<Category[]> {
+    return this.api
+      .getContent<PagedResult<Category>>({ filters: ['contentType:newsCategory'] })
+      .pipe(map(({ items }) => items));
   }
 
   /** E6: the curated featured set in editor order. `isFeatured:true` is ignored by the backend (M2). */

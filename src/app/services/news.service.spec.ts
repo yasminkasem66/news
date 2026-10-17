@@ -3,6 +3,9 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import articlesSample from '../../../docs/api/samples/E1-articles.json';
 import noResultsSample from '../../../docs/api/samples/E5-no-results.json';
+import categoriesSample from '../../../docs/api/samples/E2-categories.json';
+import byCategorySample from '../../../docs/api/samples/E3-by-category.json';
+import { Category } from '../models/category';
 import featuredSample from '../../../docs/api/samples/E6-featured.json';
 import detailSample from '../../../docs/api/samples/E7-article-detail.json';
 import retrySample from '../../../docs/api/samples/E8-language-gap-retry-default.json';
@@ -77,6 +80,55 @@ describe('NewsService', () => {
       service.getArticles({ page: 1, pageSize: 20 }).subscribe();
       const req = http.expectOne((r) => r.url === delivery);
       expect(req.request.headers.get('Accept-Language')).toBe('ar');
+      req.flush({ total: 0, items: [] });
+    });
+  });
+
+  describe('getCategories and filtered getArticles', () => {
+    const technology = '63158b7b-56d6-4fea-a957-262ec4fad8a3';
+
+    it('lists categories in response (editor) order', () => {
+      let result: Category[] = [];
+      service.getCategories().subscribe((r) => (result = r));
+      const req = http.expectOne(`${delivery}?filter=contentType:newsCategory`);
+      expect(req.request.headers.get('Accept-Language')).toBe('en-US');
+      req.flush(categoriesSample);
+      expect(result.map((c) => c.name)).toEqual(['Technology', 'Sports', 'Business']);
+    });
+
+    it('adds a category filter', () => {
+      service.getArticles({ page: 1, pageSize: 20, categoryId: technology }).subscribe();
+      http
+        .expectOne(
+          `${delivery}?filter=contentType:newsArticle&filter=category:${technology}&sort=publishedDate:desc&skip=0&take=20`,
+        )
+        .flush(byCategorySample);
+      expect().nothing();
+    });
+
+    it('adds a tag filter', () => {
+      service.getArticles({ page: 1, pageSize: 20, tag: 'demo' }).subscribe();
+      http
+        .expectOne(`${delivery}?filter=contentType:newsArticle&filter=tags:demo&sort=publishedDate:desc&skip=0&take=20`)
+        .flush({ total: 0, items: [] });
+      expect().nothing();
+    });
+
+    it('combines category and tag filters (ANDed by the backend)', () => {
+      service.getArticles({ page: 1, pageSize: 20, categoryId: technology, tag: 'demo' }).subscribe();
+      const req = http.expectOne((r) => r.url === delivery);
+      expect(req.request.params.getAll('filter')).toEqual([
+        'contentType:newsArticle',
+        `category:${technology}`,
+        'tags:demo',
+      ]);
+      req.flush({ total: 0, items: [] });
+    });
+
+    it('sends the tag exactly as given — matching is case-sensitive, so no lower-casing', () => {
+      service.getArticles({ page: 1, pageSize: 20, tag: 'Demo' }).subscribe();
+      const req = http.expectOne((r) => r.url === delivery);
+      expect(req.request.params.getAll('filter')).toContain('tags:Demo');
       req.flush({ total: 0, items: [] });
     });
   });

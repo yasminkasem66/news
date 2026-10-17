@@ -306,7 +306,7 @@ At the end of each brief phase, **stop, summarize what changed (with test result
 
 ### Tests for User Story 4
 
-- [ ] T052 [P] [US4] Extend `src/app/services/news.service.spec.ts`:
+- [X] T052 [P] [US4] Extend `src/app/services/news.service.spec.ts`:
   - `getCategories()` sends `GET {d}?filter=contentType:newsCategory` and returns 3 categories in response order (`E2-categories.json`);
   - `getArticles({page:1,pageSize:20,categoryId:'63158b7b-…'})` sends `filter=contentType:newsArticle&filter=category:63158b7b-…&sort=publishedDate:desc&skip=0&take=20`;
   - with `tag:'demo'` it appends `filter=tags:demo`;
@@ -315,10 +315,10 @@ At the end of each brief phase, **stop, summarize what changed (with test result
 
 ### Implementation for User Story 4
 
-- [ ] T053 [P] [US4] Create `src/app/models/category.ts` (`CategoryProps { colour: string | null; icon: MediaPicker | string | null }`, `Category = ContentItem<'newsCategory', CategoryProps>`), and add `getCategories(): Observable<Category[]>` to `src/app/services/news.service.ts`. Make T052 pass.
-- [ ] T054 [P] [US4] Create `src/app/features/news/category-filter.ts`, a component with inputs `categories: Category[]` and `selectedId: string | null`, emitting `selectedChange`. It renders an "All" option (`news.allCategories`) plus one option per category in response order, as a `role="radiogroup"` of buttons or a `<select>` on mobile, and shows the category `colour` as a small swatch when present. Add `src/app/features/news/category-filter.spec.ts`.
-- [ ] T055 [P] [US4] Create `src/app/features/news/tag-search.ts`, a component with input `value` and outputs `search(tag: string)` and `clear()`. It's a `<form role="search">` with a labelled input (`news.searchByTag`), helper text `news.searchHint` ("tags are matched exactly") linked by `aria-describedby`, and Submit and Clear buttons. It trims the value and emits nothing for an empty string. Add `src/app/features/news/tag-search.spec.ts`.
-- [ ] T056 [US4] Extend `src/app/features/news/news-list.page.ts`:
+- [X] T053 [P] [US4] Create `src/app/models/category.ts` (`CategoryProps { colour: string | null; icon: MediaPicker | string | null }`, `Category = ContentItem<'newsCategory', CategoryProps>`), and add `getCategories(): Observable<Category[]>` to `src/app/services/news.service.ts`. Make T052 pass.
+- [X] T054 [P] [US4] Create `src/app/features/news/category-filter.ts`, a component with inputs `categories: Category[]` and `selectedId: string | null`, emitting `selectedChange`. It renders an "All" option (`news.allCategories`) plus one option per category in response order, as a `role="radiogroup"` of buttons or a `<select>` on mobile, and shows the category `colour` as a small swatch when present. Add `src/app/features/news/category-filter.spec.ts`.
+- [X] T055 [P] [US4] Create `src/app/features/news/tag-search.ts`, a component with input `value` and outputs `search(tag: string)` and `clear()`. It's a `<form role="search">` with a labelled input (`news.searchByTag`), helper text `news.searchHint` ("tags are matched exactly") linked by `aria-describedby`, and Submit and Clear buttons. It trims the value and emits nothing for an empty string. Add `src/app/features/news/tag-search.spec.ts`.
+- [X] T056 [US4] Extend `src/app/features/news/news-list.page.ts`:
   - read the `category` and `tag` query params;
   - load categories (E2) with their own `LoadState`; if categories fail, hide the filter but keep the list working (FR-011);
   - pass `categoryId` and `tag` to `getArticles`;
@@ -327,14 +327,14 @@ At the end of each brief phase, **stop, summarize what changed (with test result
   - hide `FeaturedStrip` while any filter is active;
   - when `total === 0` with filters active, show `news.noResults` (distinct from `news.noArticlesYet`, FR-009);
   - show the active tag as a removable chip.
-- [ ] T057 [US4] Extend `src/app/features/news/news-list.page.spec.ts` covering:
+- [X] T057 [US4] Extend `src/app/features/news/news-list.page.spec.ts` covering:
   - `?category=63158b7b-…` feeds the category filter;
   - `?tag=doesnotexist` with `E5-no-results.json` shows `noResults` and **not** `noArticlesYet`;
   - Clear navigates to `/news` with no params;
   - a category-load error still renders the list.
-- [ ] T058 [US4] Confirm that tag links from US2 (`/news?tag=news`) land on the filtered list.
-- [ ] T059 [US4] Edge case: an unknown `?category=` id, or a page past the end, shows `news.noResults` and not an error.
-- [ ] T060 [US4] Check quickstart V2 and V3 by hand in both languages.
+- [X] T058 [US4] Confirm that tag links from US2 (`/news?tag=news`) land on the filtered list.
+- [X] T059 [US4] Edge case: an unknown `?category=` id, or a page past the end, shows `news.noResults` and not an error.
+- [X] T060 [US4] Check quickstart V2 and V3 by hand in both languages.
 
 **Checkpoint**: US1–US4 work on their own.
 
