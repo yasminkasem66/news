@@ -1,0 +1,252 @@
+{
+  "info": {
+    "_postman_id": "b6e1f5f0-8f2b-4a3e-9b1a-news-portal-demo",
+    "name": "News Portal Demo",
+    "description": "All Delivery API reads and the custom contact-submission write for the News Portal Demo feature (specs/001-news-portal-demo). Matches contracts/delivery-api-reads.md and contracts/contact-submission.md, verified against a running instance.\n\nSet the `baseUrl` collection variable if the app isn't running on the default `dotnet run` port. Run \"News > Browse all\" and \"News > List categories\" first and copy an id from the response into the `articleId` / `categoryId` variables to use the requests that need them.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:25050", "type": "string" },
+    { "key": "articleId", "value": "", "type": "string", "description": "Copy an item's \"id\" from News > Browse all" },
+    { "key": "categoryId", "value": "", "type": "string", "description": "Copy an item's \"id\" from News > List categories" }
+  ],
+  "item": [
+    {
+      "name": "News",
+      "item": [
+        {
+          "name": "Browse all (paginated)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/umbraco/delivery/api/v2/content?filter=contentType:newsArticle&sort=publishedDate:desc&skip=0&take=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["umbraco", "delivery", "api", "v2", "content"],
+              "query": [
+                { "key": "filter", "value": "contentType:newsArticle" },
+                { "key": "sort", "value": "publishedDate:desc" },
+                { "key": "skip", "value": "0" },
+                { "key": "take", "value": "20" }
+              ]
+            },
+            "description": "User Story 1 — no filter. Returns every published article, newest first."
+          }
+        },
+        {
+          "name": "List categories",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/umbraco/delivery/api/v2/content?filter=contentType:newsCategory",
+              "host": ["{{baseUrl}}"],
+              "path": ["umbraco", "delivery", "api", "v2", "content"],
+              "query": [{ "key": "filter", "value": "contentType:newsCategory" }]
+            },
+            "description": "Run this first to get a real category id for \"Filter by category\" below."
+          }
+        },
+        {
+          "name": "Filter by category",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/umbraco/delivery/api/v2/content?filter=contentType:newsArticle&filter=category:{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["umbraco", "delivery", "api", "v2", "content"],
+              "query": [
+                { "key": "filter", "value": "contentType:newsArticle" },
+                { "key": "filter", "value": "category:{{categoryId}}" }
+              ]
+            },
+            "description": "Set the categoryId collection variable from \"List categories\" first."
+          }
+        },
+        {
+          "name": "Search by tag",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/umbraco/delivery/api/v2/content?filter=contentType:newsArticle&filter=tags:demo",
+              "host": ["{{baseUrl}}"],
+              "path": ["umbraco", "delivery", "api", "v2", "content"],
+              "query": [
+                { "key": "filter", "value": "contentType:newsArticle" },
+                { "key": "filter", "value": "tags:demo" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search with no results",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/umbraco/delivery/api/v2/content?filter=contentType:newsArticle&filter=tags:doesnotexist",
+              "host": ["{{baseUrl}}"],
+              "path": ["umbraco", "delivery", "api", "v2", "content"],
+              "query": [
+                { "key": "filter", "value": "contentType:newsArticle" },
+                { "key": "filter", "value": "tags:doesnotexist" }
+              ]
+            },
+            "description": "Expect 200 with total:0, items:[] — not an error (spec.md FR-004)."
+          }
+        },
+        {
+          "name": "Featured articles (ordered)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/umbraco/delivery/api/v2/content?filter=contentType:newsArticle&filter=isFeatured:1&sort=featuredOrder:asc",
+              "host": ["{{baseUrl}}"],
+              "path": ["umbraco", "delivery", "api", "v2", "content"],
+              "query": [
+                { "key": "filter", "value": "contentType:newsArticle" },
+                { "key": "filter", "value": "isFeatured:1" },
+                { "key": "sort", "value": "featuredOrder:asc" }
+              ]
+            },
+            "description": "User Story 3."
+          }
+        },
+        {
+          "name": "Article detail",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/umbraco/delivery/api/v2/content/item/{{articleId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["umbraco", "delivery", "api", "v2", "content", "item", "{{articleId}}"]
+            },
+            "description": "Set the articleId collection variable from \"Browse all\" first. Note the route is /content/item/{id}, not /content/{id}."
+          }
+        },
+        {
+          "name": "Article detail (Arabic)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept-Language", "value": "ar" }],
+            "url": {
+              "raw": "{{baseUrl}}/umbraco/delivery/api/v2/content/item/{{articleId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["umbraco", "delivery", "api", "v2", "content", "item", "{{articleId}}"]
+            },
+            "description": "English-only seeded articles return 404 here — demonstrates the no-fallback bilingual behavior (spec.md FR-017)."
+          }
+        },
+        {
+          "name": "Article detail - not found",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/umbraco/delivery/api/v2/content/item/00000000-0000-0000-0000-000000000000",
+              "host": ["{{baseUrl}}"],
+              "path": ["umbraco", "delivery", "api", "v2", "content", "item", "00000000-0000-0000-0000-000000000000"]
+            },
+            "description": "Expect 404."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Site Chrome",
+      "item": [
+        {
+          "name": "Site Settings",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/umbraco/delivery/api/v2/content?filter=contentType:siteSettings",
+              "host": ["{{baseUrl}}"],
+              "path": ["umbraco", "delivery", "api", "v2", "content"],
+              "query": [{ "key": "filter", "value": "contentType:siteSettings" }]
+            },
+            "description": "User Story 4 — singleton; take items[0]."
+          }
+        }
+      ]
+    },
+    {
+      "name": "About Us",
+      "item": [
+        {
+          "name": "About Us (English)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/umbraco/delivery/api/v2/content?filter=contentType:aboutUsPage",
+              "host": ["{{baseUrl}}"],
+              "path": ["umbraco", "delivery", "api", "v2", "content"],
+              "query": [{ "key": "filter", "value": "contentType:aboutUsPage" }]
+            }
+          }
+        },
+        {
+          "name": "About Us (Arabic)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept-Language", "value": "ar" }],
+            "url": {
+              "raw": "{{baseUrl}}/umbraco/delivery/api/v2/content?filter=contentType:aboutUsPage",
+              "host": ["{{baseUrl}}"],
+              "path": ["umbraco", "delivery", "api", "v2", "content"],
+              "query": [{ "key": "filter", "value": "contentType:aboutUsPage" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Contact Us",
+      "item": [
+        {
+          "name": "Contact Us static info",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/umbraco/delivery/api/v2/content?filter=contentType:contactUsPage",
+              "host": ["{{baseUrl}}"],
+              "path": ["umbraco", "delivery", "api", "v2", "content"],
+              "query": [{ "key": "filter", "value": "contentType:contactUsPage" }]
+            },
+            "description": "User Story 6."
+          }
+        },
+        {
+          "name": "Submit contact message - valid",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Doe\",\n  \"email\": \"jane@example.com\",\n  \"subject\": \"Hello there\",\n  \"message\": \"This is a test message that is definitely long enough.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/contact",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "contact"]
+            },
+            "description": "User Story 7. Expect 201 with { status: \"success\", submittedAt }. Stored for backoffice review only — never exposed via the Delivery API."
+          }
+        },
+        {
+          "name": "Submit contact message - validation error",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"J\",\n  \"email\": \"not-an-email\",\n  \"subject\": \"Hi\",\n  \"message\": \"short\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/contact",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "contact"]
+            },
+            "description": "Expect 400 with { status: \"validationError\", errors: { field: [messages] } } and nothing stored."
+          }
+        }
+      ]
+    }
+  ]
+}
