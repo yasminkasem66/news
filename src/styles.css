@@ -7,3 +7,74 @@
 @import "@fontsource/montserrat/400.css";
 @import "@fontsource/montserrat/600.css";
 @import "@fontsource/montserrat/700.css";
+
+@theme {
+  --font-latin: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  --font-arabic: "Cairo", ui-sans-serif, system-ui, sans-serif;
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+  --color-brand-900: #1e3a8a;
+}
+
+@layer base {
+  html[lang="en"] {
+    font-family: var(--font-latin);
+  }
+
+  html[lang="ar"] {
+    font-family: var(--font-arabic);
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-600;
+  }
+}
+
+@layer components {
+  /* CMS rich text (sanitized markup rendered through [innerHTML]). */
+  .rich-text {
+    @apply text-base leading-relaxed text-slate-800;
+  }
+
+  .rich-text p {
+    @apply mb-4;
+  }
+
+  .rich-text h2 {
+    @apply mt-8 mb-3 text-2xl font-semibold;
+  }
+
+  .rich-text h3 {
+    @apply mt-6 mb-2 text-xl font-semibold;
+  }
+
+  .rich-text ul {
+    @apply mb-4 list-disc ps-6;
+  }
+
+  .rich-text ol {
+    @apply mb-4 list-decimal ps-6;
+  }
+
+  .rich-text li {
+    @apply mb-1;
+  }
+
+  .rich-text a {
+    @apply text-brand-700 underline underline-offset-2 hover:text-brand-900;
+  }
+
+  .rich-text img {
+    @apply my-4 h-auto max-w-full rounded-lg;
+  }
+
+  .rich-text blockquote {
+    @apply my-4 border-s-4 border-brand-600 ps-4 text-slate-600 italic;
+  }
+}
