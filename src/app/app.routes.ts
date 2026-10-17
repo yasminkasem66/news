@@ -13,6 +13,13 @@ export const routes: Routes = [
     loadComponent: () => import('./features/news/article-detail.page'),
   },
   {
+    path: 'contact',
+    title: 'contact.title',
+    loadComponent: () => import('./features/contact/contact.page'),
+  },
+  // CMS navigation uses this path (research §10, M4).
+  { path: 'contact-us', redirectTo: 'contact', pathMatch: 'full' },
+  {
     path: '**',
     title: 'notFound.title',
     loadComponent: () => import('./features/not-found/not-found.page'),

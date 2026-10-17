@@ -13,13 +13,20 @@ import { LanguageSwitcher } from './language-switcher';
       <div class="mx-auto flex max-w-6xl flex-wrap items-center gap-4 px-4 py-3">
         <a routerLink="/" class="text-lg font-bold text-slate-900">{{ 'site.name' | transloco }}</a>
         <!-- Temporary until US7 renders the CMS primaryNavigation. -->
-        <nav [attr.aria-label]="'nav.primary' | transloco">
+        <nav [attr.aria-label]="'nav.primary' | transloco" class="flex gap-4">
           <a
             routerLink="/news"
             routerLinkActive="text-brand-700"
             ariaCurrentWhenActive="page"
             class="font-semibold text-slate-700 hover:text-brand-700"
             >{{ 'nav.news' | transloco }}</a
+          >
+          <a
+            routerLink="/contact"
+            routerLinkActive="text-brand-700"
+            ariaCurrentWhenActive="page"
+            class="font-semibold text-slate-700 hover:text-brand-700"
+            >{{ 'nav.contact' | transloco }}</a
           >
         </nav>
         <app-language-switcher class="ms-auto" />

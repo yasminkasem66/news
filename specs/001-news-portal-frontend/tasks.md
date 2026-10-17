@@ -348,7 +348,7 @@ At the end of each brief phase, **stop, summarize what changed (with test result
 
 ### Tests for User Story 5
 
-- [ ] T061 [P] [US5] Write `src/app/services/contact.service.spec.ts`:
+- [X] T061 [P] [US5] Write `src/app/services/contact.service.spec.ts`:
   - `submit({name:'Jane Doe',email:'jane@example.com',subject:'Hello there',message:'This is a test message that is definitely long enough.'})` sends `POST {api}/api/contact` with exactly that JSON body and **no** `Accept-Language` header;
   - a 201 with `E13-contact-valid.json` gives `{kind:'success', submittedAt}`;
   - a 400 with `E13-contact-invalid.json` (PascalCase keys `Name`, `Email`, `Subject`, `Message`) gives `{kind:'validation', fieldErrors:{name:[…],email:[…],subject:[…],message:[…]}, otherErrors:[]}`;
@@ -356,11 +356,11 @@ At the end of each brief phase, **stop, summarize what changed (with test result
   - status 0 gives `{kind:'failure'}`;
   - a 500 gives `{kind:'failure'}`;
   - the observable **never errors**.
-- [ ] T062 [P] [US5] Write `src/app/services/page.service.spec.ts`, section `getContactInfo`: it sends `GET {d}?filter=contentType:contactUsPage` and returns `items[0]` (`E12-contact-info.json`), and returns `null` for `{"total":0,"items":[]}`.
+- [X] T062 [P] [US5] Write `src/app/services/page.service.spec.ts`, section `getContactInfo`: it sends `GET {d}?filter=contentType:contactUsPage` and returns `items[0]` (`E12-contact-info.json`), and returns `null` for `{"total":0,"items":[]}`.
 
 ### Implementation for User Story 5
 
-- [ ] T063 [P] [US5] Create `src/app/models/contact.ts` with these types, verbatim from data-model.md:
+- [X] T063 [P] [US5] Create `src/app/models/contact.ts` with these types, verbatim from data-model.md:
   - `ContactRequest { name: string; email: string; subject: string; message: string }`
   - `ContactSuccessResponse { status: 'success'; submittedAt: string }` (HTTP 201)
   - `ContactValidationResponse { status: 'validationError'; errors: Record<string, string[]> }` (HTTP 400; keys are PascalCase in practice)
@@ -368,11 +368,11 @@ At the end of each brief phase, **stop, summarize what changed (with test result
   - the `ContactResult` union
 
   Also export `CONTACT_RULES = { name: { min: 2, max: 100 }, subject: { min: 3, max: 150 }, message: { min: 10, max: 2000 } }`, with email "required, valid email".
-- [ ] T064 [P] [US5] Create `src/app/models/contact-page.ts`: `SocialLink { platform: string; url: string }`, `ContactPageProps { intro, address, phone, email, officeHours, mapCoordinates: string | null; socialLinks: BlockList<SocialLink> }` and `ContactPage = ContentItem<'contactUsPage', ContactPageProps>`. (`SocialLink` is reused by US7.)
-- [ ] T065 [US5] Create `src/app/services/contact.service.ts` with `submit(req): Observable<ContactResult>`, using `ApiService.post<ContactSuccessResponse>('/api/contact', req)`. It maps 201 to success. On `HttpErrorResponse` with status 400 and body `status === 'validationError'`, it maps each key **case-insensitively** to a `ContactField` (research §11, M1), with unknown keys going to `otherErrors`. Anything else becomes `failure` (via `catchError`, never rethrowing). Make T061 pass.
-- [ ] T066 [US5] Create `src/app/services/page.service.ts` with `getContactInfo(): Observable<ContactPage | null>` (`filters: ['contentType:contactUsPage']`, `items[0] ?? null`). Make T062 pass.
-- [ ] T067 [P] [US5] Create `src/app/shared/social-links.ts`, a component with input `links: SocialLink[]`. It renders nothing when empty; otherwise a `<ul>` of external links (`target="_blank" rel="noopener noreferrer"`) labelled with `platform`.
-- [ ] T068 [US5] Create `src/app/features/contact/contact-form.ts`, a reactive form component with these validators:
+- [X] T064 [P] [US5] Create `src/app/models/contact-page.ts`: `SocialLink { platform: string; url: string }`, `ContactPageProps { intro, address, phone, email, officeHours, mapCoordinates: string | null; socialLinks: BlockList<SocialLink> }` and `ContactPage = ContentItem<'contactUsPage', ContactPageProps>`. (`SocialLink` is reused by US7.)
+- [X] T065 [US5] Create `src/app/services/contact.service.ts` with `submit(req): Observable<ContactResult>`, using `ApiService.post<ContactSuccessResponse>('/api/contact', req)`. It maps 201 to success. On `HttpErrorResponse` with status 400 and body `status === 'validationError'`, it maps each key **case-insensitively** to a `ContactField` (research §11, M1), with unknown keys going to `otherErrors`. Anything else becomes `failure` (via `catchError`, never rethrowing). Make T061 pass.
+- [X] T066 [US5] Create `src/app/services/page.service.ts` with `getContactInfo(): Observable<ContactPage | null>` (`filters: ['contentType:contactUsPage']`, `items[0] ?? null`). Make T062 pass.
+- [X] T067 [P] [US5] Create `src/app/shared/social-links.ts`, a component with input `links: SocialLink[]`. It renders nothing when empty; otherwise a `<ul>` of external links (`target="_blank" rel="noopener noreferrer"`) labelled with `platform`.
+- [X] T068 [US5] Create `src/app/features/contact/contact-form.ts`, a reactive form component with these validators:
   - `name`: `[Validators.required, Validators.minLength(2), Validators.maxLength(100)]` (validated on the trimmed value);
   - `email`: `[Validators.required, Validators.email]`;
   - `subject`: `[Validators.required, Validators.minLength(3), Validators.maxLength(150)]`;
@@ -387,22 +387,22 @@ At the end of each brief phase, **stop, summarize what changed (with test result
   - `failure`: show `contact.form.failure` with a Retry button that resubmits the same values (FR-033).
 
   Client error text uses the `contact.errors.*` keys, with `{min}`/`{max}` taken from `CONTACT_RULES`. Server messages are shown as received.
-- [ ] T069 [US5] Create `src/app/features/contact/contact.page.ts`, a page component that loads `PageService.getContactInfo()` with its own `LoadState`. On `ok`, it renders:
+- [X] T069 [US5] Create `src/app/features/contact/contact.page.ts`, a page component that loads `PageService.getContactInfo()` with its own `LoadState`. On `ok`, it renders:
   - `<h1>` name and the intro;
   - address, phone (as a `tel:` link), email (as a `mailto:` link) and office hours, each left out when empty;
   - a map link from `parseCoordinates(mapCoordinates)` → `osmLink` (`contact.openMap`, external, new tab), left out when it doesn't parse;
   - `SocialLinks` from `blocks(socialLinks)`.
 
   `empty` shows `state.contentUnavailable`, and `error` shows an `ErrorBlock`. `ContactForm` always renders, **independent** of the info state.
-- [ ] T070 [US5] In `src/app/app.routes.ts`, register `{ path: 'contact', title: 'contact.title', loadComponent: () => import('./features/contact/contact.page') }` and `{ path: 'contact-us', redirectTo: 'contact', pathMatch: 'full' }` (research §10, M4).
-- [ ] T071 [P] [US5] Add `src/app/features/contact/contact-form.spec.ts` covering:
+- [X] T070 [US5] In `src/app/app.routes.ts`, register `{ path: 'contact', title: 'contact.title', loadComponent: () => import('./features/contact/contact.page') }` and `{ path: 'contact-us', redirectTo: 'contact', pathMatch: 'full' }` (research §10, M4).
+- [X] T071 [P] [US5] Add `src/app/features/contact/contact-form.spec.ts` covering:
   - submitting `J` / `not-an-email` / `Hi` / `short` shows 4 errors, focuses `name` and sends no request;
   - a mocked `validation` result puts the server text under `email` and keeps the values;
   - `success` clears the form;
   - `failure` shows Retry and keeps the values;
   - the button is disabled while submitting;
   - the counter shows `5 / 2000` after typing `hello`.
-- [ ] T072 [US5] Check quickstart V10–V13 by hand. After V11, confirm the submission appears in the Umbraco backoffice under Contact Us → Contact Submissions.
+- [X] T072 [US5] Check quickstart V10–V13 by hand. After V11, confirm the submission appears in the Umbraco backoffice under Contact Us → Contact Submissions.
 
 **Checkpoint**: US5 works on its own.
 
