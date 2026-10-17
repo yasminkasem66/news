@@ -41,6 +41,7 @@ export const appConfig: ApplicationConfig = {
     provideAppInitializer(() => {
       inject(LanguageService);
     }),
-    { provide: TitleStrategy, useClass: PageTitleStrategy },
+    // useExisting: the router and pages calling setRaw() must share one instance.
+    { provide: TitleStrategy, useExisting: PageTitleStrategy },
   ],
 };

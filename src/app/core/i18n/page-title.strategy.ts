@@ -34,6 +34,11 @@ export class PageTitleStrategy extends TitleStrategy {
     this.current.next({ kind: 'raw', value: text });
   }
 
+  /** Use a translated label as the current page's title (e.g. a not-found state). */
+  setKey(key: string): void {
+    this.current.next({ kind: 'key', value: key });
+  }
+
   private apply(page: PageTitle): void {
     const siteName = this.transloco.translate('site.name');
     if (!page) {

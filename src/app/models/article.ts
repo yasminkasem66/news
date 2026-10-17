@@ -1,4 +1,5 @@
 import { ContentItem, ContentRoute, MediaPicker, RichText } from './delivery-api';
+import { Lang } from './lang';
 
 /** The article's category arrives expanded one level; no `expand=` needed (research §5). */
 export interface CategoryRef {
@@ -27,6 +28,12 @@ export interface ArticleProps {
 }
 
 export type Article = ContentItem<'newsArticle', ArticleProps>;
+
+/** Detail lookup outcome; the two kinds of 404 are told apart by a retry in English (research §6). */
+export type ArticleResult =
+  | { kind: 'ok'; article: Article }
+  | { kind: 'notFound' }
+  | { kind: 'languageGap'; availableIn: Lang[] };
 
 export interface ArticleQuery {
   /** 1-based. */

@@ -4,10 +4,12 @@ import { TestBed } from '@angular/core/testing';
 import articlesSample from '../../../docs/api/samples/E1-articles.json';
 import noResultsSample from '../../../docs/api/samples/E5-no-results.json';
 import featuredSample from '../../../docs/api/samples/E6-featured.json';
+import detailSample from '../../../docs/api/samples/E7-article-detail.json';
+import retrySample from '../../../docs/api/samples/E8-language-gap-retry-default.json';
 import { environment } from '../../environments/environment';
 import { acceptLanguageInterceptor } from '../core/api/accept-language.interceptor';
 import { LanguageService } from '../core/i18n/language.service';
-import { Article } from '../models/article';
+import { Article, ArticleResult } from '../models/article';
 import { PagedResult } from '../models/delivery-api';
 import { provideTranslocoTesting } from '../testing/transloco-testing';
 import { NewsService } from './news.service';
@@ -76,6 +78,72 @@ describe('NewsService', () => {
       const req = http.expectOne((r) => r.url === delivery);
       expect(req.request.headers.get('Accept-Language')).toBe('ar');
       req.flush({ total: 0, items: [] });
+    });
+  });
+
+  describe('getArticle', () => {
+    const translatedId = '5b8e0d5f-b1a4-4518-816d-371f1300bbf9';
+    const englishOnlyId = '170e2282-6ae0-4f0d-b6f1-b080d6c10d2f';
+    const missingId = '00000000-0000-0000-0000-000000000000';
+    const notFound = { status: 404, statusText: 'Not Found' };
+
+    it('returns ok with the article and its cultures', () => {
+      let result: ArticleResult | undefined;
+      service.getArticle(translatedId).subscribe((r) => (result = r));
+
+      const req = http.expectOne(`${delivery}/item/${translatedId}`);
+      expect(req.request.headers.get('Accept-Language')).toBe('en-US');
+      req.flush(detailSample);
+
+      expect(result!.kind).toBe('ok');
+      if (result!.kind === 'ok') {
+        expect(result!.article.name).toBe('City Unveils New Tech Hub');
+        expect(Object.keys(result!.article.cultures!)).toContain('ar');
+      }
+    });
+
+    it('in Arabic, a 404 then English 200 is a language gap (exactly one retry, in en-US)', () => {
+      language.setLang('ar');
+      let result: ArticleResult | undefined;
+      service.getArticle(englishOnlyId).subscribe((r) => (result = r));
+
+      const first = http.expectOne(`${delivery}/item/${englishOnlyId}`);
+      expect(first.request.headers.get('Accept-Language')).toBe('ar');
+      first.flush(null, notFound);
+
+      const retry = http.expectOne(`${delivery}/item/${englishOnlyId}`);
+      expect(retry.request.headers.get('Accept-Language')).toBe('en-US');
+      retry.flush(retrySample);
+
+      expect(result).toEqual({ kind: 'languageGap', availableIn: ['en'] });
+    });
+
+    it('in Arabic, a 404 then English 404 is not found', () => {
+      language.setLang('ar');
+      let result: ArticleResult | undefined;
+      service.getArticle(missingId).subscribe((r) => (result = r));
+
+      http.expectOne(`${delivery}/item/${missingId}`).flush(null, notFound);
+      http.expectOne(`${delivery}/item/${missingId}`).flush(null, notFound);
+
+      expect(result).toEqual({ kind: 'notFound' });
+    });
+
+    it('in English, a 404 is not found with no retry', () => {
+      let result: ArticleResult | undefined;
+      service.getArticle(missingId).subscribe((r) => (result = r));
+
+      http.expectOne(`${delivery}/item/${missingId}`).flush(null, notFound);
+      http.expectNone(`${delivery}/item/${missingId}`);
+
+      expect(result).toEqual({ kind: 'notFound' });
+    });
+
+    it('propagates other errors', () => {
+      let error: unknown;
+      service.getArticle(translatedId).subscribe({ error: (e) => (error = e) });
+      http.expectOne(`${delivery}/item/${translatedId}`).flush(null, { status: 500, statusText: 'Server Error' });
+      expect(error).toBeTruthy();
     });
   });
 

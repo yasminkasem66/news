@@ -53,7 +53,10 @@
   "article": {
     "languageGapTitle": "Not available in this language",
     "languageGapBody": "This article hasn't been published in English. You can read it in another language.",
-    "readIn": "Read in {{lang}}"
+    "readIn": {
+      "en": "Read in English",
+      "ar": "Read in Arabic"
+    }
   },
   "about": {
     "title": "About us",

@@ -1,13 +1,19 @@
+import { HttpContext, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { map, Observable } from 'rxjs';
+import { catchError, defer, map, Observable, of, throwError } from 'rxjs';
+import { LANGUAGE_OVERRIDE } from '../core/api/accept-language.interceptor';
 import { ApiService } from '../core/api/api.service';
-import { Article, ArticleQuery } from '../models/article';
+import { LanguageService } from '../core/i18n/language.service';
+import { availableLangs } from '../core/util/cultures';
+import { Article, ArticleQuery, ArticleResult } from '../models/article';
 import { PagedResult } from '../models/delivery-api';
+import { DEFAULT_LANG } from '../models/lang';
 
 /** News Articles and Categories (endpoints E1–E9 in contracts/data-services.md). */
 @Injectable({ providedIn: 'root' })
 export class NewsService {
   private readonly api = inject(ApiService);
+  private readonly language = inject(LanguageService);
 
   /** E1/E3/E4/E5: newest published first, paged by the server. */
   getArticles(query: ArticleQuery): Observable<PagedResult<Article>> {
@@ -43,4 +49,39 @@ export class NewsService {
         ),
       );
   }
+
+  /**
+   * E7/E8/E9. A 404 is ambiguous: missing, or not translated into the active language. Outside the
+   * default language, one retry in the default culture tells them apart (docs/api/05-api-reference.md).
+   */
+  getArticle(id: string): Observable<ArticleResult> {
+    return defer(() => {
+      const requestedLang = this.language.lang();
+      return this.api.getItem<Article>(id).pipe(
+        map((article): ArticleResult => ({ kind: 'ok', article })),
+        catchError((error: unknown) => {
+          if (!isNotFound(error)) {
+            return throwError(() => error);
+          }
+          if (requestedLang === DEFAULT_LANG) {
+            return of<ArticleResult>({ kind: 'notFound' });
+          }
+          const context = new HttpContext().set(LANGUAGE_OVERRIDE, DEFAULT_LANG);
+          return this.api.getItem<Article>(id, context).pipe(
+            map((article): ArticleResult => {
+              const langs = availableLangs(article);
+              return { kind: 'languageGap', availableIn: langs.length ? langs : [DEFAULT_LANG] };
+            }),
+            catchError((retryError: unknown) =>
+              isNotFound(retryError) ? of<ArticleResult>({ kind: 'notFound' }) : throwError(() => retryError),
+            ),
+          );
+        }),
+      );
+    });
+  }
+}
+
+function isNotFound(error: unknown): boolean {
+  return error instanceof HttpErrorResponse && error.status === 404;
 }

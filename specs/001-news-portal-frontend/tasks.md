@@ -245,7 +245,7 @@ At the end of each brief phase, **stop, summarize what changed (with test result
 
 ### Tests for User Story 2
 
-- [ ] T038 [P] [US2] Extend `src/app/services/news.service.spec.ts` with a `getArticle` section:
+- [X] T038 [P] [US2] Extend `src/app/services/news.service.spec.ts` with a `getArticle` section:
   - 200 (`E7-article-detail.json`) gives `{kind:'ok', article}` with `cultures` kept;
   - in `ar`, a 404 on `{d}/item/170e2282…` triggers exactly **one** retry to the same URL with `Accept-Language: en-US` (via `LANGUAGE_OVERRIDE`), which responds 200 (`E8-language-gap-retry-default.json`) and gives `{kind:'languageGap', availableIn:['en']}`;
   - in `ar`, a 404 then a 404 gives `{kind:'notFound'}`;
@@ -254,16 +254,16 @@ At the end of each brief phase, **stop, summarize what changed (with test result
 
 ### Implementation for User Story 2
 
-- [ ] T039 [US2] Add `getArticle(id: string): Observable<ArticleResult>` to `src/app/services/news.service.ts`, with `ArticleResult = {kind:'ok'; article: Article} | {kind:'notFound'} | {kind:'languageGap'; availableIn: Lang[]}` exported from `src/app/models/article.ts`:
+- [X] T039 [US2] Add `getArticle(id: string): Observable<ArticleResult>` to `src/app/services/news.service.ts`, with `ArticleResult = {kind:'ok'; article: Article} | {kind:'notFound'} | {kind:'languageGap'; availableIn: Lang[]}` exported from `src/app/models/article.ts`:
   - `ApiService.getItem(id)`;
   - on `HttpErrorResponse` 404, if `LanguageService.lang() === 'ar'`, call `getItem(id, new HttpContext().set(LANGUAGE_OVERRIDE, 'en'))`: 200 gives `languageGap(availableLangs(res))`, 404 gives `notFound`;
   - a 404 in `en` gives `notFound`;
   - other errors rethrow.
 
   Make T038 pass.
-- [ ] T040 [P] [US2] Create `src/app/features/news/article-gallery.ts`, a component with input `images: MediaPicker`. It renders nothing when it's `null` or empty, otherwise a responsive grid of images (`alt` = media `name`, `loading="lazy"`) under the `news.gallery` heading.
-- [ ] T041 [P] [US2] Create `src/app/features/news/tag-list.ts`, a component with input `tags: string[] | null`. It renders each tag as `<a routerLink="/news" [queryParams]="{ tag }">` (FR-016) and nothing when there are no tags.
-- [ ] T042 [US2] Create `src/app/features/news/article-detail.page.ts`, a page component with input `id` (route param). It loads `NewsService.getArticle(id)` into a `LoadState`:
+- [X] T040 [P] [US2] Create `src/app/features/news/article-gallery.ts`, a component with input `images: MediaPicker`. It renders nothing when it's `null` or empty, otherwise a responsive grid of images (`alt` = media `name`, `loading="lazy"`) under the `news.gallery` heading.
+- [X] T041 [P] [US2] Create `src/app/features/news/tag-list.ts`, a component with input `tags: string[] | null`. It renders each tag as `<a routerLink="/news" [queryParams]="{ tag }">` (FR-016) and nothing when there are no tags.
+- [X] T042 [US2] Create `src/app/features/news/article-detail.page.ts`, a page component with input `id` (route param). It loads `NewsService.getArticle(id)` into a `LoadState`:
   - `loading` → `LoadingBlock`;
   - `ok` → `<article>` with `<h1>` name, category name, featured image (`firstMedia`, `alt` = article name, eager loading), published date, author (only when present), `TagList`, `RichText` body, `ArticleGallery`;
   - `notFound` → `NotFoundBlock` linking to `/news` (FR-014);
@@ -271,11 +271,11 @@ At the end of each brief phase, **stop, summarize what changed (with test result
   - `error` → `ErrorBlock` with retry.
 
   On `ok`, call `PageTitleStrategy.setRaw(article.name)` (FR-017). Re-fetch on `id` change.
-- [ ] T043 [US2] Register `{ path: 'news/:id', loadComponent: () => import('./features/news/article-detail.page') }` in `src/app/app.routes.ts`, after `news` and before the wildcard.
-- [ ] T044 [P] [US2] Add `src/app/features/news/article-detail.page.spec.ts` with a mocked `NewsService` covering: `ok` renders title, author, tags and body; `notFound` renders a back link to `/news`; `languageGap` renders the switch button and **not** the not-found text; a body with no gallery renders no gallery heading.
-- [ ] T045 [P] [US2] Add `src/app/features/news/tag-list.spec.ts`, asserting the link `href` is `/news?tag=news`.
-- [ ] T046 [US2] Make sure `ArticleCard` titles from US1 link to `/news/{id}` (already in T029), then run through quickstart V4 and V5 by hand.
-- [ ] T047 [US2] Confirm that no `bypassSecurityTrust` appears anywhere in `src/` (`grep -r bypassSecurityTrust src` returns nothing). Note the result for the phase report.
+- [X] T043 [US2] Register `{ path: 'news/:id', loadComponent: () => import('./features/news/article-detail.page') }` in `src/app/app.routes.ts`, after `news` and before the wildcard.
+- [X] T044 [P] [US2] Add `src/app/features/news/article-detail.page.spec.ts` with a mocked `NewsService` covering: `ok` renders title, author, tags and body; `notFound` renders a back link to `/news`; `languageGap` renders the switch button and **not** the not-found text; a body with no gallery renders no gallery heading.
+- [X] T045 [P] [US2] Add `src/app/features/news/tag-list.spec.ts`, asserting the link `href` is `/news?tag=news`.
+- [X] T046 [US2] Make sure `ArticleCard` titles from US1 link to `/news/{id}` (already in T029), then run through quickstart V4 and V5 by hand.
+- [X] T047 [US2] Confirm that no `bypassSecurityTrust` appears anywhere in `src/` (`grep -r bypassSecurityTrust src` returns nothing). Note the result for the phase report.
 
 **Checkpoint**: US1 and US2 work on their own.
 

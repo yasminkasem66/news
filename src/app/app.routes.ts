@@ -8,6 +8,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/news/news-list.page'),
   },
   {
+    // Title is set by the page from the article name (PageTitleStrategy.setRaw).
+    path: 'news/:id',
+    loadComponent: () => import('./features/news/article-detail.page'),
+  },
+  {
     path: '**',
     title: 'notFound.title',
     loadComponent: () => import('./features/not-found/not-found.page'),
