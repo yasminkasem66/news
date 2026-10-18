@@ -490,8 +490,8 @@ At the end of each brief phase, **stop, summarize what changed (with test result
 
 ## Phase 10: Polish & Cross-Cutting Concerns (brief Phase 8)
 
-- [ ] T090 Final route-table check in `src/app/app.routes.ts`, in this order: `''`, `news`, `news/:id`, `about`, `about-us`→`about`, `contact`, `contact-us`→`contact`, `**`. Every feature uses `loadComponent` (lazy).
-- [ ] T091 [P] Accessibility pass on every page in both languages:
+- [X] T090 Final route-table check in `src/app/app.routes.ts`, in this order: `''`, `news`, `news/:id`, `about`, `about-us`→`about`, `contact`, `contact-us`→`contact`, `**`. Every feature uses `loadComponent` (lazy).
+- [X] T091 [P] Accessibility pass on every page in both languages:
   - one `<h1>` per page;
   - heading order;
   - visible `focus-visible` rings on all interactive elements;
@@ -500,11 +500,11 @@ At the end of each brief phase, **stop, summarize what changed (with test result
   - full keyboard navigation through header, filters, pagination and the form (FR-035).
 
   Fix any issues in place.
-- [ ] T092 [P] Responsive pass at 375 px, 768 px and 1280 px for every route in `en` and `ar`: no horizontal scroll, the grid collapses, and the mobile menu works (FR-036, SC-008). Fix any issues in place.
-- [ ] T093 [P] Hardcoded-content audit: search `src/app/**/*.html` and the inline templates for literal user-visible text. Everything must be a Transloco key or a CMS field (FR-001, Constitution II). Confirm `en.json` and `ar.json` have identical key sets with a short node one-liner, and record the output.
-- [ ] T094 [P] SSR-safety audit: `grep -rn "localStorage\|window\.\|document\." src/app`. Each hit must sit behind `isPlatformBrowser`, the `DOCUMENT` token, or try/catch (Constitution, Technology Constraints).
-- [ ] T095 Check performance against SC-004 and SC-005: run `npm run build`, confirm the initial bundle is under the existing 2 MB warning budget and every component style is under 4 kB, and check in DevTools that `/news` and `/news/:id` render their main content within 2 s on a "Fast 4G" throttle.
-- [ ] T096 Update `README.md` with: prerequisites (backend at `http://localhost:25050`), `npm start` / `npm test` / `npm run build`, a link to `specs/001-news-portal-frontend/quickstart.md`, and the known backend gaps G2 and M5 from `research.md`.
+- [X] T092 [P] Responsive pass at 375 px, 768 px and 1280 px for every route in `en` and `ar`: no horizontal scroll, the grid collapses, and the mobile menu works (FR-036, SC-008). Fix any issues in place.
+- [X] T093 [P] Hardcoded-content audit: search `src/app/**/*.html` and the inline templates for literal user-visible text. Everything must be a Transloco key or a CMS field (FR-001, Constitution II). Confirm `en.json` and `ar.json` have identical key sets with a short node one-liner, and record the output.
+- [X] T094 [P] SSR-safety audit: `grep -rn "localStorage\|window\.\|document\." src/app`. Each hit must sit behind `isPlatformBrowser`, the `DOCUMENT` token, or try/catch (Constitution, Technology Constraints).
+- [X] T095 Check performance against SC-004 and SC-005: run `npm run build`, confirm the initial bundle is under the existing 2 MB warning budget and every component style is under 4 kB, and check in DevTools that `/news` and `/news/:id` render their main content within 2 s on a "Fast 4G" throttle.
+- [X] T096 Update `README.md` with: prerequisites (backend at `http://localhost:25050`), `npm start` / `npm test` / `npm run build`, a link to `specs/001-news-portal-frontend/quickstart.md`, and the known backend gaps G2 and M5 from `research.md`.
 
 ---
 

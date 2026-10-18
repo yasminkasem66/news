@@ -6,7 +6,6 @@
   "nav": {
     "home": "Home",
     "news": "News",
-    "about": "About",
     "contact": "Contact",
     "menu": "Open menu",
     "close": "Close menu",
@@ -98,7 +97,6 @@
     "home": "Go to home page"
   },
   "footer": {
-    "follow": "Follow us",
-    "links": "Footer links"
+    "follow": "Follow us"
   }
 }
