@@ -510,17 +510,17 @@ At the end of each brief phase, **stop, summarize what changed (with test result
 
 ## Phase 11: Verification (brief Phase 9)
 
-- [ ] T097 Run `npm run build` (production) and `npm test`. Fix every failure until both are green, and record the test count.
-- [ ] T098 With the backend running and seeded, walk through every request in `docs/api/postman_collection.json` and write `specs/001-news-portal-frontend/verification.md`: a table of **Postman request → screen/behavior → result** (pass/fail plus notes), covering all 15 requests and quickstart V1–V15.
-- [ ] T099 In `verification.md`, explicitly confirm each of these with its observed result:
+- [X] T097 Run `npm run build` (production) and `npm test`. Fix every failure until both are green, and record the test count.
+- [X] T098 With the backend running and seeded, walk through every request in `docs/api/postman_collection.json` and write `specs/001-news-portal-frontend/verification.md`: a table of **Postman request → screen/behavior → result** (pass/fail plus notes), covering all 15 requests and quickstart V1–V15.
+- [X] T099 In `verification.md`, explicitly confirm each of these with its observed result:
   - an English-only article in Arabic shows the language-gap state (V7a and V7b);
   - a nonexistent id shows not-found (V5);
   - an empty search shows the empty state (V3);
   - an invalid contact submission shows field errors (V10, V12);
   - a valid submission shows success (V11);
   - the submitted message appears in the backoffice under Contact Us → Contact Submissions.
-- [ ] T100 Confirm, and record in `verification.md`, that no content is hardcoded (T093 output) and that no backend file was changed. The backend lives in `D:\studying\umbraco`; run `git -C D:/studying/umbraco status --short` and record the result.
-- [ ] T101 Write the final summary in `verification.md`: what is runnable, how to start both apps (`dotnet run` in `D:\studying\umbraco`, `npm start` here), the URLs to open, what was left out, and the open backend gaps (G2 free-text search, M5 `?culture=` ignored).
+- [X] T100 Confirm, and record in `verification.md`, that no content is hardcoded (T093 output) and that no backend file was changed. The backend lives in `D:\studying\umbraco`; run `git -C D:/studying/umbraco status --short` and record the result.
+- [X] T101 Write the final summary in `verification.md`: what is runnable, how to start both apps (`dotnet run` in `D:\studying\umbraco`, `npm start` here), the URLs to open, what was left out, and the open backend gaps (G2 free-text search, M5 `?culture=` ignored).
 
 ---
 
